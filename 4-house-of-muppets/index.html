@@ -4,51 +4,14 @@
     <body>
 
         <!--
-            Oppgave 4: Navn og bilde
+            Oppgave 4:
 
             Denne filen inneholder unødvendig repetisjon! (Vær DRY!)
             Bruk <templeate> og createShadowRoot() til å
             generere li-elementene fra en JavaScript-liste.
         -->
 
-        <ul id="liste">
-            <li>
-                <section class="name-section">
-                    <header>
-                        <a href="#" onclick="sayHi(this)"><span class="navn">Morten Kjelling</span></a>
-                    </header>
-                </section>
-                <section>
-                    <main class="avatar">
-                        <img src="/assets/morten.jpg" />
-                    </main>
-                </section>
-            </li>
-            <li>
-                <section class="name-section">
-                    <header>
-                        <a href="#" onclick="sayHi(this)"><span class="navn">Bjørn Thoresen</span></a>
-                    </header>
-                </section>
-                <section>
-                    <main class="avatar">
-                        <img src="/assets/bjorn.jpg" />
-                    </main>
-                </section>
-            </li>
-            <li>
-                <section class="name-section">
-                    <header>
-                        <a href="#" onclick="sayHi(this)"><span class="navn">Yngve Svalestuen</span></a>
-                    </header>
-                </section>
-                <section>
-                    <main class="avatar">
-                        <img src="/assets/yngve.jpg" />
-                    </main>
-                </section>
-            </li>
-        </ul>
+        <ul id="liste"></ul>
 
         <!-- Her er en template du kan bruke. -->
         <template id="person">
@@ -73,8 +36,9 @@
         <script>
             // Deklarer listen over personer på denne måten:
             var personer = [
-                {navn: 'Morten Kjelling', img: '/assets/morten.jpg'}
-                // ...
+                {navn: 'Morten Kjelling', img: '/assets/morten.jpg'},
+                {navn: 'Bjørn Thoresen', img: '/assets/bjorn.jpg'},
+                {navn: 'Yngve Svalestuen', img: '/assets/yngve.jpg'}
             ];
 
             var template = document.querySelector('#person');
@@ -86,12 +50,27 @@
                 var shadow = shadowElement.createShadowRoot();
                 shadow.appendChild(clone);
 
-                // Legg inn person-elementer i host basert på templaten her.
+                // Extra creditz
+                var a = shadow.getElementsByTagName('a')[0];
+                a.addEventListener('click', function () {
+                    sayHi(person.navn);
+                });
+
+                var contentNameSpan = document.createElement('span'),
+                    contentAvatarImg = document.createElement('img');
+
+                contentNameSpan.textContent = person.navn;
+                contentAvatarImg.src = person.img;
+
+                shadowElement.appendChild(contentNameSpan);
+                shadowElement.appendChild(contentAvatarImg);
+
+                host.appendChild(shadowElement);
             });
 
             // Extra credit: prøv å tilpasse denne funksjonen så den fungerer med shadow DOM!
-            function sayHi(element) {
-                alert('Hi, ' + element.textContent);
+            function sayHi(name) {
+                alert('Hi, ' + name);
             }
         </script>
     </body>

@@ -28,10 +28,17 @@
                 }
         -->
 
-        <!-- Lag "my-control"-elementet her -->
+        <polymer-element name="my-control" attributes="styling" noscript>
+            <template>
+                <p>
+                    <span>Write a color value</span>
+                    <input value="{{styling.color}}" />
+                    <input type="number" value="{{styling.size}}" />
+                </p>
+            </template>
+        </polymer-element>
 
-        <!-- Ikke rør denne -->
-        <polymer-element name="red-app">
+        <polymer-element name="app-5">
             <template>
                 <styled-text styling="{{styling}}">Gjør meg STOR og rød</styled-text>
                 <my-control styling="{{styling}}"></my-control>
@@ -43,6 +50,6 @@
             </script>
         </polymer-element>
 
-        <red-app></red-app>
+        <app-5></app-5>
     </body>
 </html>

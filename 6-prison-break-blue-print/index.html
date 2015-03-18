@@ -18,7 +18,16 @@
 
         <polymer-element name="escape-app">
             <template>
-                <!-- Skriv oversikten over rømningsveier her -->
+                <template repeat="{{route in escapes}}">
+                    <template if="{{route.name}}">
+                        <h4>{{route.name}}</h4>
+                    </template>
+                    <template if="{{route.img}}">
+                        <img src="{{route.img}}" />
+                    </template>
+                    <p>Time to escape: <span>{{route.timeToEscape}}</span> seconds</p>
+                    <p>Survival rate: <span>{{route.survivalRate * 100}}</span>%</p>
+                </template>
             </template>
             <script>
                 Polymer({
@@ -37,13 +46,12 @@
                             name: 'Hoppe ut',
                             timeToEscape: 0.3,
                             survivalRate: 0.02
-                        } /* Extra credit,
+                        },
                         {
                             img: '/assets/classic-escape.jpg',
                             timeToEscape: 8000,
                             survivalRate: 0.4
                         }
-                        */
                     ]
                 });
             </script>

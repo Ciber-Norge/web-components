@@ -1,5 +1,3 @@
-# Oppgaver til WebComponents-kurs
+# Løsninger til WC-oppgaver
 
-Her finner du oppgavene til kurset. Oppgavene bruker "vanilla" WebComponents, men oppgavene 5-7 bruker Polymer.
-
-Lykke til! :)
+Løsningene! ;)
