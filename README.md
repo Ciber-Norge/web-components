@@ -1,3 +1,3 @@
-# Løsninger til WC-oppgaver
+ï»¿# LÃ¸sninger til WC-oppgaver
 
-Løsningene! ;)
+LÃ¸sningene! ;)
