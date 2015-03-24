@@ -7,8 +7,51 @@
 
     <link rel="import" href="/bower_components/polymer/polymer.html">
     <link rel="import" href="/bower_components/core-ajax/core-ajax.html">
+    <link rel="import" href="/bower_components/paper-input/paper-input.html">
+    <link rel="import" href="/bower_components/paper-button/paper-button.html">
+    <link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
+    <link rel="import" href="/bower_components/core-image/core-image.html">
+    <link href="/bower_components/core-icons/core-icons.html" rel="import">
+    <link href="/bower_components/core-icon-button/core-icon-button.html" rel="import">
+    <link href="/bower_components/core-animated-pages/core-animated-pages.html" rel="import">
+
+
+    <style>
+        body {
+          font-family: sans-serif;
+        }
+
+        .toolbar {
+          background-color: steelblue;
+        }
+
+        #container {
+          overflow: hidden;
+        }
+
+        #noscroll {
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+
+        .card {
+          position: relative;
+          height: 150px;
+          width: 200px;
+          font-size: 30px;
+          margin: 8px;
+          border-radius: 4px;
+          cursor: default;
+        }
+
+        .view {
+          font-size: 20px;
+          background-color: tomato;
+        }
+
+  </style>
 </head>
-<body>
+<body unresolved fullbleed vertical layout>
     <!--
         Oppgave 7: kjendismania
 
@@ -25,11 +68,11 @@
     <polymer-element name="click-frame" attributes="showLabel hideLabel">
         <template>
             <template if="{{!opened}}">
-                <a href="#" on-click="{{open}}">{{showLabel}}</a>
+                <paper-button raised on-click="{{open}}">{{showLabel}}</paper-button>
             </template>
             <template if="{{opened}}">
                 <content></content>
-                <a href="#" on-click="{{hide}}">{{hideLabel}}</a>
+                <paper-button raised on-click="{{hide}}">{{hideLabel}}</paper-button>
             </template>
         </template>
         <script>
@@ -43,34 +86,51 @@
 
     <polymer-element name="kjendis-app">
         <template>
-            <template if="{{!data}}"><span>Laster...</span></template>
-            <p><input type="search" value="{{filterString}}" placeholder="Filter..." /></p>
-            <table>
-                <thead>
-                    <th>Category</th>
-                    <th>Name</th>
-                    <th>Occupation</th>
-                    <th>Website</th>
-                    <th>Best of</th>
-                </thead>
-                <tbody>
-                    <template repeat="{{x in data | filter(filterString)}}">
-                        <tr>
-                            <td>{{x.category}}</td>
-                            <td>{{x.name}}</td>
-                            <td>{{x.occupation}}</td>
-                            <td><a href="{{x.website}}">Website</a></td>
-                            <td>
-                                <click-frame showLabel="Click to open" hideLabel="Hide the abomination!">
-                                    <iframe src="{{x.bestOf}}"></iframe>
-                                </click-frame>
-                            </td>
-                        </tr>
-                    </template>
-                </tbody>
-            </table>
+            <core-toolbar class="tall">
+                <core-icon-button icon="{{$.pages.selected != 0 ? 'arrow-back' : 'menu'}}" on-tap="{{back}}"></core-icon-button>
+                <div class="middle indent">Internet celebrities</div>
+                <div class="bottom indent"><paper-input label="Filtrer" floatinglabel="" value="{{filterString}}"></paper-input></div>
+            </core-toolbar>
+            <section flex>
+            <section vertical layout>
+                <template if="{{!data}}"><span>Laster...</span></template>
+                <div id="noscroll" fit hero-p>
+                  <div id="container" flex horizontal wrap around-justified layout cross-fade>
+                        <template repeat="{{x in data | filter(filterString)}}">
+                              <style>
+                                  .card {
+                                    position: relative;
+                                    font-size: 13px;
+                                    margin: 8px;
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                  }
+                            </style>
+                            <div class="card" vertical center center-justified layout hero-id="item-{{x.nr}}" hero?="{{$.pages.selected === x.nr + 1 || lastSelected === x.nr + 1}}" on-tap="{{selectView}}">
+                                <header>
+                                    <core-image style="width:100px; height:100px;" sizing="cover" src="{{x.avatar}}"></core-image>
+                                    <h3>{{x.name}}</h3>
+                                </header>
+                                <div class="celebrity-content">
+                                    <p>Occupation: {{x.occupation}}</p>
+                                    <p>Category: {{x.category}}</p>
+                                    <p><a href="{{x.website}}">Website</a></p>
+                                    <p>
+                                        <click-frame showLabel="Click to open" hideLabel="Hide the abomination!">
+                                            <iframe src="{{x.bestOf}}"></iframe>
+                                        </click-frame>
+                                    </p>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </section>
+        </section>
+            
             <core-ajax auto response="{{data}}" url="http://ciber-norge.github.io/data/vips.json"></core-ajax>
         </template>
+
         <script>
             Polymer({
                 filter: function (data, str) {
