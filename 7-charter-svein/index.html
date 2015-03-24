@@ -9,6 +9,7 @@
     <link rel="import" href="/bower_components/core-ajax/core-ajax.html">
     <link rel="import" href="/bower_components/paper-input/paper-input.html">
     <link rel="import" href="/bower_components/paper-button/paper-button.html">
+    <link rel="import" href="/bower_components/paper-shadow/paper-shadow.html">
     <link rel="import" href="/bower_components/core-toolbar/core-toolbar.html">
     <link rel="import" href="/bower_components/core-image/core-image.html">
     <link href="/bower_components/core-icons/core-icons.html" rel="import">
@@ -18,37 +19,8 @@
 
     <style>
         body {
-          font-family: sans-serif;
+            font-family: sans-serif;
         }
-
-        .toolbar {
-          background-color: steelblue;
-        }
-
-        #container {
-          overflow: hidden;
-        }
-
-        #noscroll {
-          overflow-x: hidden;
-          overflow-y: auto;
-        }
-
-        .card {
-          position: relative;
-          height: 150px;
-          width: 200px;
-          font-size: 30px;
-          margin: 8px;
-          border-radius: 4px;
-          cursor: default;
-        }
-
-        .view {
-          font-size: 20px;
-          background-color: tomato;
-        }
-
   </style>
 </head>
 <body unresolved fullbleed vertical layout>
@@ -65,74 +37,188 @@
         Even more credit: Filtrér listn med et input-felt.
     -->
 
-    <polymer-element name="click-frame" attributes="showLabel hideLabel">
+    <polymer-element name="click-frame" attributes="showLabel hideLabel opened src frameWidth frameHeight">
         <template>
+            <style>
+                :host {
+                    display: block;
+                }
+                .btn {
+                    background-color: white;
+                }
+                .btn, #frame {
+                    margin: 0;
+                    display: block;
+                    width: 100%;
+                    box-sizing: border-box;
+                }
+                #frame {
+                    background-color: black;
+                    height: 100%;
+                    border: 0;
+                }
+                #opened {
+                    position: fixed;
+                    top: 50px;
+                    left: 50px;
+                    right: 50px;
+                    bottom: 100px;
+                }
+            </style>
             <template if="{{!opened}}">
-                <paper-button raised on-click="{{open}}">{{showLabel}}</paper-button>
+                <paper-button class="btn" raised on-click="{{open}}">{{showLabel}}</paper-button>
             </template>
             <template if="{{opened}}">
-                <content></content>
-                <paper-button raised on-click="{{hide}}">{{hideLabel}}</paper-button>
+                <div id="opened">
+                    <paper-button class="btn" raised on-click="{{hide}}">{{hideLabel}}</paper-button>
+                    <iframe id="frame" src="{{opened ? src : ''}}"></iframe>
+                </div>
             </template>
         </template>
         <script>
             Polymer({
                 opened: false,
+                frameWidth: '320px',
+                frameHeight: '240px',
                 open: function () { this.opened = true; },
                 hide: function () { this.opened = false; }
             });
         </script>
     </polymer-element>
 
-    <polymer-element name="kjendis-app">
+    <polymer-element name="kjendis-details" attributes="model" noscript>
         <template>
-            <core-toolbar class="tall">
+            <header>
+                <kjendis-overview model="{{model}}"></kjendis-overview>
+            </header>
+            <div class="celebrity-content">
+              <p>Occupation: {{model.occupation}}</p>
+              <p>Category: {{model.category}}</p>
+              <p><a href="{{model.website}}">Website</a></p>
+              <click-frame showLabel="Click to open"
+                           hideLabel="Hide the abomination!"
+                           src="{{model.bestOf}}"
+                           frameWidth="640px"
+                           frameHeight="480px"></click-frame>
+            </div>
+        </template>
+    </polymer-element>
+
+    <polymer-element name="kjendis-overview" attributes="model imageWidth imageHeight">
+        <template>
+            <core-image style="width: {{imageWidth}}; height: {{imageHeight}};"
+                        sizing="cover"
+                        src="{{model.avatar}}"></core-image>
+            <h3>{{model.name}}</h3>
+        </template>
+        <script>
+            Polymer({
+                imageWidth: '320px',
+                imageHeight: '240px'
+            })
+        </script>
+    </polymer-element>
+
+    <polymer-element name="kjendis-app" attributes="color">
+        <template>
+            <style>
+                .toolbar {
+                    background-color: mediumaquamarine;
+                }
+                #container {
+                    overflow: hidden;
+                }
+                #noscroll {
+                    overflow-x: hidden;
+                    overflow-y: auto;
+                }
+                #filter /deep/ ::-webkit-input-placeholder {
+                    color: black;
+                }
+                #filter::shadow [focused] /deep/ ::-webkit-input-placeholder {
+                    color: #4059a9;
+                }
+                .card {
+                    position: relative;
+                    height: 380px;
+                    width: 340px;
+                    font-size: 20px;
+                    margin: 8px;
+                    padding: 15px;
+                    text-align: center;
+                    background-color: {{color}};
+                    border-radius: 4px;
+                    cursor: pointer;
+                }
+                .card /deep/ h3 {
+                    margin: 0;
+                }
+                .view {
+                    font-size: 24px;
+                    padding: 40px;
+                    background-color: {{color}};
+                }
+            </style>
+            <core-toolbar class="toolbar">
                 <core-icon-button icon="{{$.pages.selected != 0 ? 'arrow-back' : 'menu'}}" on-tap="{{back}}"></core-icon-button>
-                <div class="middle indent">Internet celebrities</div>
-                <div class="bottom indent"><paper-input label="Filtrer" floatinglabel="" value="{{filterString}}"></paper-input></div>
+                <div flex>Internet celebrities</div>
+                <template if="{{$.pages.selected == 0}}">
+                    <paper-input id="filter" label="Filtrer" floatingLabel="false" value="{{filterString}}"></paper-input>
+                    <core-icon icon="search"></core-icon>
+                </template>
             </core-toolbar>
-            <section flex>
-            <section vertical layout>
+
+            <core-animated-pages id="pages" flex selected="0" on-core-animated-pages-transition-end="{{transitionend}}" transitions="cross-fade-all hero-transition">
                 <template if="{{!data}}"><span>Laster...</span></template>
-                <div id="noscroll" fit hero-p>
-                  <div id="container" flex horizontal wrap around-justified layout cross-fade>
-                        <template repeat="{{x in data | filter(filterString)}}">
-                              <style>
-                                  .card {
-                                    position: relative;
-                                    font-size: 13px;
-                                    margin: 8px;
-                                    border-radius: 4px;
-                                    cursor: pointer;
-                                  }
-                            </style>
-                            <div class="card" vertical center center-justified layout hero-id="item-{{x.nr}}" hero?="{{$.pages.selected === x.nr + 1 || lastSelected === x.nr + 1}}" on-tap="{{selectView}}">
-                                <header>
-                                    <core-image style="width:100px; height:100px;" sizing="cover" src="{{x.avatar}}"></core-image>
-                                    <h3>{{x.name}}</h3>
-                                </header>
-                                <div class="celebrity-content">
-                                    <p>Occupation: {{x.occupation}}</p>
-                                    <p>Category: {{x.category}}</p>
-                                    <p><a href="{{x.website}}">Website</a></p>
-                                    <p>
-                                        <click-frame showLabel="Click to open" hideLabel="Hide the abomination!">
-                                            <iframe src="{{x.bestOf}}"></iframe>
-                                        </click-frame>
-                                    </p>
-                                </div>
-                            </div>
+
+                <section vertical layout>
+                    <div id="noscroll" fit hero-p>
+                      <div id="container" flex horizontal wrap around-justified layout cross-fade>
+                        <template repeat="{{item in data | filter(filterString)}}">
+                          <div class="card" vertical center center-justified layout hero-id="item-{{item.nr}}" hero?="{{$.pages.selected === item.nr || lastSelected === item.nr}}"
+                               on-tap="{{selectView}}">
+                              <kjendis-overview cross-fade model="{{item}}"
+                                                imageWidth="300px"
+                                                imageHeight="300px"></kjendis-overview>
+                          </div>
                         </template>
+                      </div>
                     </div>
-                </div>
-            </section>
-        </section>
-            
+                </section>
+
+                <template repeat="{{item in data}}">
+                    <section vertical layout>
+                        <div class="view" flex vertical center center-justified layout hero-id="item-{{item.nr}}" hero?="{{$.pages.selected === item.nr || $.pages.selected === 0}}">
+                            <kjendis-details cross-fade model="{{item}}"></kjendis-details>
+                        </div>
+                    </section>
+                </template>
+
+            </core-animated-pages>
+
             <core-ajax auto response="{{data}}" url="http://ciber-norge.github.io/data/vips.json"></core-ajax>
         </template>
 
         <script>
             Polymer({
+                color: 'lightsteelblue',
+
+                selectView: function (event) {
+                    var id = event.target.templateInstance.model.item.nr;
+                    this.$.pages.selected = id;
+                },
+
+                back: function () {
+                    this.lastSelected = this.$.pages.selected;
+                    this.$.pages.selected = 0;
+                },
+
+                transitionend: function () {
+                    if (this.lastSelected) {
+                        this.lastSelected = null;
+                    }
+                },
+
                 filter: function (data, str) {
                     if (!str) return data;
 
@@ -146,6 +232,6 @@
         </script>
     </polymer-element>
 
-    <kjendis-app></kjendis-app>
+    <kjendis-app fit vertical layout></kjendis-app>
 </body>
 </html>
